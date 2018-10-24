@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.List;
 
 import me.eglp.twitch.TwitchAPI;
+import me.mrletsplay.mrcore.json.JSONObject;
 import me.mrletsplay.mrcore.misc.Complex;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
 
 public class TwitchStream {
 

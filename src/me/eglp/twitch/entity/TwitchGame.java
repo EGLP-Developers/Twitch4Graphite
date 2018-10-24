@@ -1,7 +1,7 @@
 package me.eglp.twitch.entity;
 
 import me.eglp.twitch.TwitchAPI;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONObject;
 
 public class TwitchGame {
 

@@ -1,6 +1,6 @@
 package me.eglp.twitch.util;
 
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONObject;
 
 public class OAuthToken {
 	

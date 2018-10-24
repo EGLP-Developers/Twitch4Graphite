@@ -8,8 +8,8 @@ import me.eglp.twitch.util.TwitchEndpoint;
 import me.mrletsplay.mrcore.http.HttpGet;
 import me.mrletsplay.mrcore.http.HttpPost;
 import me.mrletsplay.mrcore.http.HttpRequest;
-import me.mrletsplay.mrcore.misc.JSON.JSONArray;
-import me.mrletsplay.mrcore.misc.JSON.JSONObject;
+import me.mrletsplay.mrcore.json.JSONArray;
+import me.mrletsplay.mrcore.json.JSONObject;
 
 public class TwitchAPI {
 
