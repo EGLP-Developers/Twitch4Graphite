@@ -10,7 +10,6 @@ public class TwitchUser {
 	private long viewCount;
 	
 	public TwitchUser(TwitchAPI twitch, JSONObject raw) {
-		System.out.println(raw.toFancyString());
 		this.twitch = twitch;
 		this.id = raw.getString("id");
 		this.login = raw.getString("login");
