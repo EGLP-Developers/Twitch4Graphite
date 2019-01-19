@@ -1,5 +1,7 @@
 package me.eglp.twitch;
 
+import java.util.regex.Pattern;
+
 import me.eglp.twitch.entity.TwitchGame;
 import me.eglp.twitch.entity.TwitchStream;
 import me.eglp.twitch.entity.TwitchUser;
@@ -16,6 +18,9 @@ public class TwitchAPI {
 	public static final String
 		ENDPOINT = "https://api.twitch.tv/helix/",
 		OAUTH_ENDPOINT = "https://id.twitch.tv/oauth2/";
+	
+	private static final Pattern
+		VALID_USER_NAME = Pattern.compile("[a-zA-Z0-9_-]++");
 	
 	private String clientID, clientSecret;
 	private OAuthToken token;
@@ -39,6 +44,7 @@ public class TwitchAPI {
 	}
 	
 	public TwitchUser getUserByName(String name) {
+		if(!VALID_USER_NAME.matcher(name).matches()) return null;
 		JSONArray arr = makeGetRequest(TwitchEndpoint.GET_USERS, "login", name).getJSONArray("data");
 		if(arr.isEmpty()) return null;
 		return new TwitchUser(this, arr.getJSONObject(0));
