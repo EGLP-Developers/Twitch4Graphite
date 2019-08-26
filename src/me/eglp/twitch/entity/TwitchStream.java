@@ -1,6 +1,7 @@
 package me.eglp.twitch.entity;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 import me.eglp.twitch.TwitchAPI;
@@ -22,7 +23,7 @@ public class TwitchStream {
 		this.id = raw.getString("id");
 		this.userID = raw.getString("user_id");
 		this.gameID = raw.getString("game_id");
-		this.communityIDs = Complex.castList(raw.getJSONArray("community_ids"), String.class).get();
+		this.communityIDs = raw.has("community_ids") ? Complex.castList(raw.getJSONArray("community_ids"), String.class).get() : Collections.emptyList();
 		this.title = raw.getString("title");
 		this.viewerCount = raw.getLong("viewer_count");
 		this.startedAt = Instant.parse(raw.getString("started_at"));
