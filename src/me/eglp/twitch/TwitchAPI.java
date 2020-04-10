@@ -5,11 +5,13 @@ import java.util.regex.Pattern;
 import me.eglp.twitch.entity.TwitchGame;
 import me.eglp.twitch.entity.TwitchStream;
 import me.eglp.twitch.entity.TwitchUser;
+import me.eglp.twitch.ratelimit.Ratelimiter;
 import me.eglp.twitch.util.OAuthToken;
 import me.eglp.twitch.util.TwitchEndpoint;
 import me.mrletsplay.mrcore.http.HttpGet;
 import me.mrletsplay.mrcore.http.HttpPost;
 import me.mrletsplay.mrcore.http.HttpRequest;
+import me.mrletsplay.mrcore.http.HttpResult;
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
 
@@ -68,22 +70,32 @@ public class TwitchAPI {
 		return new TwitchGame(this, arr.getJSONObject(0));
 	}
 	
-	public JSONObject makeGetRequest(TwitchEndpoint endpoint, String... queryParams) {
+	public synchronized JSONObject makeGetRequest(TwitchEndpoint endpoint, String... queryParams) {
+		Ratelimiter.waitForRatelimitIfNeeded();
 		HttpGet r = HttpRequest.createGet(endpoint.getURL());
 		if(token != null) r.setHeaderParameter("Authorization", "Bearer " + token.getAccessToken());
 		for(int i = 0; i < queryParams.length; i+=2) {
 			r.setQueryParameter(queryParams[i], queryParams[i+1]);
 		}
-		return r.execute().asJSONObject();
+		HttpResult res = r.execute();
+		String ratelimitReset = res.getHeaderFields().get("ratelimit-reset").get(0);
+		String ratelimitRemaining = res.getHeaderFields().get("ratelimit-remaining").get(0);
+		Ratelimiter.setRatelimitReset(ratelimitRemaining.equals("0"), Long.parseLong(ratelimitReset));
+		return res.asJSONObject();
 	}
 	
-	public JSONObject makePostRequest(TwitchEndpoint endpoint, String... queryParams) {
+	public synchronized JSONObject makePostRequest(TwitchEndpoint endpoint, String... queryParams) {
+		Ratelimiter.waitForRatelimitIfNeeded();
 		HttpPost r = HttpRequest.createPost(endpoint.getURL());
 		if(token != null) r.setHeaderParameter("Authorization", "Bearer " + token.getAccessToken());
 		for(int i = 0; i < queryParams.length; i+=2) {
 			r.setQueryParameter(queryParams[i], queryParams[i+1]);
 		}
-		return r.execute().asJSONObject();
+		HttpResult res = r.execute();
+		String ratelimitReset = res.getHeaderFields().get("ratelimit-reset").get(0);
+		String ratelimitRemaining = res.getHeaderFields().get("ratelimit-remaining").get(0);
+		Ratelimiter.setRatelimitReset(ratelimitRemaining.equals("0"), Long.parseLong(ratelimitReset));
+		return res.asJSONObject();
 	}
 	
 }
