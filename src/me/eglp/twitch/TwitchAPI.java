@@ -74,6 +74,7 @@ public class TwitchAPI {
 		Ratelimiter.waitForRatelimitIfNeeded();
 		HttpGet r = HttpRequest.createGet(endpoint.getURL());
 		
+		r.setHeaderParameter("Client-ID", clientID);
 		if(token != null) r.setHeaderParameter("Authorization", "Bearer " + token.getAccessToken());
 		for(int i = 0; i < queryParams.length; i+=2) {
 			r.setQueryParameter(queryParams[i], queryParams[i+1]);
@@ -93,7 +94,8 @@ public class TwitchAPI {
 	public synchronized JSONObject makePostRequest(TwitchEndpoint endpoint, String... queryParams) {
 		Ratelimiter.waitForRatelimitIfNeeded();
 		HttpPost r = HttpRequest.createPost(endpoint.getURL());
-		
+
+		r.setHeaderParameter("Client-ID", clientID);
 		if(token != null) r.setHeaderParameter("Authorization", "Bearer " + token.getAccessToken());
 		for(int i = 0; i < queryParams.length; i+=2) {
 			r.setQueryParameter(queryParams[i], queryParams[i+1]);
