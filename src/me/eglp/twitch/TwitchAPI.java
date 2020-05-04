@@ -70,7 +70,13 @@ public class TwitchAPI {
 		return new TwitchGame(this, arr.getJSONObject(0));
 	}
 	
+	private void ensureTokenValid() {
+		if(token.getExpiresAt() - System.currentTimeMillis() < 10000)
+			this.token = new OAuthToken(makePostRequest(TwitchEndpoint.OAUTH_TOKEN, false, "client_id", clientID, "client_secret", clientSecret, "grant_type", "client_credentials"));
+	}
+	
 	public synchronized JSONObject makeGetRequest(TwitchEndpoint endpoint, String... queryParams) {
+		ensureTokenValid();
 		Ratelimiter.waitForRatelimitIfNeeded();
 		HttpGet r = HttpRequest.createGet(endpoint.getURL());
 		
@@ -92,6 +98,11 @@ public class TwitchAPI {
 	}
 	
 	public synchronized JSONObject makePostRequest(TwitchEndpoint endpoint, String... queryParams) {
+		return makePostRequest(endpoint, true, queryParams);
+	}
+	
+	public synchronized JSONObject makePostRequest(TwitchEndpoint endpoint, boolean tokenCheck, String... queryParams) {
+		if(tokenCheck) ensureTokenValid();
 		Ratelimiter.waitForRatelimitIfNeeded();
 		HttpPost r = HttpRequest.createPost(endpoint.getURL());
 
