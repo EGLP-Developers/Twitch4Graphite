@@ -30,7 +30,7 @@ public class TwitchAPI {
 	public TwitchAPI(String clientID, String clientSecret) {
 		this.clientID = clientID;
 		this.clientSecret = clientSecret;
-		this.token = new OAuthToken(makePostRequest(TwitchEndpoint.OAUTH_TOKEN, "client_id", clientID, "client_secret", clientSecret, "grant_type", "client_credentials"));
+		this.token = new OAuthToken(makePostRequest(TwitchEndpoint.OAUTH_TOKEN, false, "client_id", clientID, "client_secret", clientSecret, "grant_type", "client_credentials"));
 	}
 	
 	public String getClientID() {
