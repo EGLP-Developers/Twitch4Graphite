@@ -70,13 +70,17 @@ public class TwitchAPI {
 		return new TwitchGame(this, arr.getJSONObject(0));
 	}
 	
-	private void ensureTokenValid() {
-		if(token.getExpiresAt() - System.currentTimeMillis() < 10000)
+	private void ensureTokenValid(boolean forceRefresh) {
+		if(forceRefresh || token.getExpiresAt() - System.currentTimeMillis() < 10000)
 			this.token = new OAuthToken(makePostRequest(TwitchEndpoint.OAUTH_TOKEN, false, "client_id", clientID, "client_secret", clientSecret, "grant_type", "client_credentials"));
 	}
 	
 	public synchronized JSONObject makeGetRequest(TwitchEndpoint endpoint, String... queryParams) {
-		ensureTokenValid();
+		return makeGetRequest(endpoint, true, queryParams);
+	}
+	
+	public synchronized JSONObject makeGetRequest(TwitchEndpoint endpoint, boolean tokenCheck, String... queryParams) {
+		if(tokenCheck) ensureTokenValid(false);
 		Ratelimiter.waitForRatelimitIfNeeded();
 		HttpGet r = HttpRequest.createGet(endpoint.getURL());
 		
@@ -86,15 +90,21 @@ public class TwitchAPI {
 			r.setQueryParameter(queryParams[i], queryParams[i+1]);
 		}
 		
-		HttpResult res = r.execute();
-		
-		if(res.getHeaderFields().containsKey("ratelimit-reset")) {
-			String ratelimitReset = res.getHeaderFields().get("ratelimit-reset").get(0);
-			String ratelimitRemaining = res.getHeaderFields().get("ratelimit-remaining").get(0);
-			Ratelimiter.setRatelimitReset(ratelimitRemaining.equals("0"), Long.parseLong(ratelimitReset));
+		try {
+			HttpResult res = r.execute();
+			
+			if(res.getHeaderFields().containsKey("ratelimit-reset")) {
+				String ratelimitReset = res.getHeaderFields().get("ratelimit-reset").get(0);
+				String ratelimitRemaining = res.getHeaderFields().get("ratelimit-remaining").get(0);
+				Ratelimiter.setRatelimitReset(ratelimitRemaining.equals("0"), Long.parseLong(ratelimitReset));
+			}
+			
+			return res.asJSONObject();
+		}catch(Exception e) {
+			if(!tokenCheck) throw e;
+			ensureTokenValid(true);
+			return makeGetRequest(endpoint, false, queryParams);
 		}
-		
-		return res.asJSONObject();
 	}
 	
 	public synchronized JSONObject makePostRequest(TwitchEndpoint endpoint, String... queryParams) {
@@ -102,7 +112,7 @@ public class TwitchAPI {
 	}
 	
 	public synchronized JSONObject makePostRequest(TwitchEndpoint endpoint, boolean tokenCheck, String... queryParams) {
-		if(tokenCheck) ensureTokenValid();
+		if(tokenCheck) ensureTokenValid(false);
 		Ratelimiter.waitForRatelimitIfNeeded();
 		HttpPost r = HttpRequest.createPost(endpoint.getURL());
 
@@ -112,15 +122,21 @@ public class TwitchAPI {
 			r.setQueryParameter(queryParams[i], queryParams[i+1]);
 		}
 		
-		HttpResult res = r.execute();
-		
-		if(res.getHeaderFields().containsKey("ratelimit-reset")) {
-			String ratelimitReset = res.getHeaderFields().get("ratelimit-reset").get(0);
-			String ratelimitRemaining = res.getHeaderFields().get("ratelimit-remaining").get(0);
-			Ratelimiter.setRatelimitReset(ratelimitRemaining.equals("0"), Long.parseLong(ratelimitReset));
+		try {
+			HttpResult res = r.execute();
+			
+			if(res.getHeaderFields().containsKey("ratelimit-reset")) {
+				String ratelimitReset = res.getHeaderFields().get("ratelimit-reset").get(0);
+				String ratelimitRemaining = res.getHeaderFields().get("ratelimit-remaining").get(0);
+				Ratelimiter.setRatelimitReset(ratelimitRemaining.equals("0"), Long.parseLong(ratelimitReset));
+			}
+			
+			return res.asJSONObject();
+		}catch(Exception e) {
+			if(!tokenCheck) throw e;
+			ensureTokenValid(true);
+			return makePostRequest(endpoint, false, queryParams);
 		}
-		
-		return res.asJSONObject();
 	}
 	
 }
