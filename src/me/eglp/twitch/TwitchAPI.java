@@ -98,7 +98,7 @@ public class TwitchAPI {
 		return new TwitchStream(this, arr.getJSONObject(0));
 	}
 	
-	public TwitchStream getStreamsByUserIDs(String... ids) {
+	public List<TwitchStream> getStreamsByUserIDs(String... ids) {
 		List<String> params = new ArrayList<>();
 		Arrays.stream(ids)
 			.forEach(name -> {
@@ -106,8 +106,10 @@ public class TwitchAPI {
 				params.add(name);
 			});
 		JSONArray arr = makeGetRequest(TwitchEndpoint.GET_STREAMS, params.toArray(new String[params.size()])).getJSONArray("data");
-		if(arr.isEmpty()) return null;
-		return new TwitchStream(this, arr.getJSONObject(0));
+		if(arr.isEmpty()) return Collections.emptyList();
+		return arr.stream()
+				.map(o -> new TwitchStream(this, (JSONObject) o))
+				.collect(Collectors.toList());
 	}
 	
 	public TwitchGame getGameByID(String id) {
