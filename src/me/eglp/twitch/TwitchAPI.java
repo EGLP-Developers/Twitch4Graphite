@@ -1,6 +1,11 @@
 package me.eglp.twitch;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import me.eglp.twitch.entity.TwitchGame;
 import me.eglp.twitch.entity.TwitchStream;
@@ -52,10 +57,39 @@ public class TwitchAPI {
 		return new TwitchUser(this, arr.getJSONObject(0));
 	}
 	
+	public List<TwitchUser> getUsersByNames(String... names) {
+		List<String> params = new ArrayList<>();
+		Arrays.stream(names)
+			.filter(name -> VALID_USER_NAME.matcher(name).matches())
+			.forEach(name -> {
+				params.add("login");
+				params.add(name);
+			});
+		JSONArray arr = makeGetRequest(TwitchEndpoint.GET_USERS, params.toArray(new String[params.size()])).getJSONArray("data");
+		if(arr.isEmpty()) return Collections.emptyList();
+		return arr.stream()
+				.map(o -> new TwitchUser(this, (JSONObject) o))
+				.collect(Collectors.toList());
+	}
+	
 	public TwitchUser getUserByID(String id) {
 		JSONArray arr = makeGetRequest(TwitchEndpoint.GET_USERS, "id", id).getJSONArray("data");
 		if(arr.isEmpty()) return null;
 		return new TwitchUser(this, arr.getJSONObject(0));
+	}
+	
+	public List<TwitchUser> getUsersByIDs(String... ids) {
+		List<String> params = new ArrayList<>();
+		Arrays.stream(ids)
+			.forEach(name -> {
+				params.add("id");
+				params.add(name);
+			});
+		JSONArray arr = makeGetRequest(TwitchEndpoint.GET_USERS, params.toArray(new String[params.size()])).getJSONArray("data");
+		if(arr.isEmpty()) return Collections.emptyList();
+		return arr.stream()
+				.map(o -> new TwitchUser(this, (JSONObject) o))
+				.collect(Collectors.toList());
 	}
 	
 	public TwitchStream getStreamByUserID(String id) {
@@ -87,7 +121,7 @@ public class TwitchAPI {
 		r.setHeaderParameter("Client-ID", clientID);
 		if(token != null) r.setHeaderParameter("Authorization", "Bearer " + token.getAccessToken());
 		for(int i = 0; i < queryParams.length; i+=2) {
-			r.setQueryParameter(queryParams[i], queryParams[i+1]);
+			r.addQueryParameter(queryParams[i], queryParams[i+1]);
 		}
 		
 		try {
