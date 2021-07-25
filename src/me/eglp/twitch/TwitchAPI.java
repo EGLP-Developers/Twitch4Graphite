@@ -19,6 +19,7 @@ import me.mrletsplay.mrcore.http.HttpRequest;
 import me.mrletsplay.mrcore.http.HttpResult;
 import me.mrletsplay.mrcore.json.JSONArray;
 import me.mrletsplay.mrcore.json.JSONObject;
+import me.mrletsplay.mrcore.misc.FriendlyException;
 
 public class TwitchAPI {
 
@@ -149,7 +150,7 @@ public class TwitchAPI {
 			
 			return res.asJSONObject();
 		}catch(Exception e) {
-			if(!tokenCheck) throw e;
+			if(!tokenCheck) throw new FriendlyException("Request failed", e);
 			ensureTokenValid(true);
 			return makeGetRequest(endpoint, false, queryParams);
 		}

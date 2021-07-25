@@ -48,6 +48,7 @@ public class TwitchStream {
 	}
 	
 	public TwitchGame getGame() {
+		if(gameID == null || gameID.isEmpty()) return null;
 		return twitch.getGameByID(gameID);
 	}
 	
